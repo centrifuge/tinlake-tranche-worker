@@ -13,30 +13,33 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 pragma solidity >=0.5.15 <0.6.0;
 
-import "tinlake-auth/auth.sol";
-
 interface TrancheLike {
-    function supplyOrder(address usr, uint currencyAmount) public;
-    function redeemOrder(address usr, uint tokenAmount) public;
-    function disburse(address usr) public returns (uint payoutCurrencyAmount,
+    function supplyOrder(address usr, uint currencyAmount) external;
+    function redeemOrder(address usr, uint tokenAmount) external;
+    function disburse(address usr) external returns (uint payoutCurrencyAmount,
         uint payoutTokenAmount, uint remainingSupplyCurrency,  uint remainingRedeemToken);
 }
 
-contract TrancheWorker is Auth {
-    constructor (address tranche_) public {
+contract TrancheWorker {
+    mapping (address => uint) public wards;
+    function rely(address usr) public auth { wards[usr] = 1; }
+    function deny(address usr) public auth { wards[usr] = 0; }
+    modifier auth { require(wards[msg.sender] == 1); _; }
+
+    constructor () public {
         wards[msg.sender] = 1;
     }
 
     function disburse(address tranche, address usr) public auth returns (uint payoutCurrencyAmount,
         uint payoutTokenAmount, uint remainingSupplyCurrency,  uint remainingRedeemToken) {
-        return TrancheLike(tranche_).disburse(usr);
+        return TrancheLike(tranche).disburse(usr);
     }
 
     function cancelSupplyOrder(address tranche, address usr) public auth {
-        TrancheLike(tranche_).supplyOrder(usr, 0);
+        TrancheLike(tranche).supplyOrder(usr, 0);
     }
 
     function cancelRedeemOrder(address tranche, address usr) public auth {
-        TrancheLike(tranche_).redeemOrder(usr, 0);
+        TrancheLike(tranche).redeemOrder(usr, 0);
     }
 }
