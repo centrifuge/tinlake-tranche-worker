@@ -2,13 +2,13 @@ pragma solidity ^0.6.7;
 
 import "ds-test/test.sol";
 
-import "./TinlakeTrancheWorker.sol";
+import "./tranche-worker.sol";
 
-contract TinlakeTrancheWorkerTest is DSTest {
-    TinlakeTrancheWorker worker;
+contract TrancheWorkerTest is DSTest {
+    TrancheWorker worker;
 
     function setUp() public {
-        worker = new TinlakeTrancheWorker();
+        worker = new TrancheWorker();
     }
 
     function testFail_basic_sanity() public {
